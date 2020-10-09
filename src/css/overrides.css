@@ -1,0 +1,2 @@
+/* Prevents vue-multiselect from using two lines without breaking component */
+.multiselect__single { display: none; }

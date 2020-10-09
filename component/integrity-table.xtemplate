@@ -1,0 +1,55 @@
+<script type="text/x-template" id="integrity-table">
+<div id="int-table-wrapper">
+<div class="int-table-flex int-table-align">
+	<div class="col-3">
+		<h2>{{name}}</h2>
+	</div>
+	<div class="col-6">
+		<div v-show="filterToggle" class="int-table-flex">
+			<div class="col-5">
+				<select class="form-control" v-model="selectedFilterColumn">
+					<option value='nocolumn'>Select Column...</option>
+					<option v-for='(item, index) in columns' :value="item">{{item}} {{activeFilterCount(item)}}</option>
+				</select>
+			</div>
+			<div class="col-5">
+				<div v-if="selectedFilterColumn != 'nocolumn'" class="int-table-lift">
+					<vue-multiselect :options="filterOptions[selectedFilterColumn]" v-model="filters[selectedFilterColumn]" :multiple="true" :close-on-select="false" :clear-on-select="false" :limit="0" :limit-text="limitText" placeholder="" @close=""></vue-multiselect>
+				</div>
+			</div>
+			<div class="col-1"></div>
+			<div class="col-1 btn btn-warning" @click="resetFilters"><i class="fas fa-recycle"></i></div>
+		</div>
+	</div>
+	<div class="int-table-flex col-3">
+		<div :class="'col-2 btn btn-' + (filterToggle ? 'info' : 'primary')" @click="filterToggle = !filterToggle"><i class="fas fa-filter"></i></div>
+		<div class="col-1"></div>
+		<input type="text" v-model="search" class="form-control col-8" placeholder="search">
+	</div>
+</div>
+<div id="int-table-container">
+	<div class="int-table">
+		<div class="int-table-header">
+			<div class="int-table-row">
+				<div v-for="(column, index) in columns" @click="setOrder(index + 1)" :class="colWidthClass(fields[index])">
+					<span>{{column}} <i :class="sortClass()" v-if="order == index + 1"></i></span>
+				</div>
+			</div>
+		</div>
+		<div class="int-table-body">
+			<div class="int-table-row" v-for="(item, index) in filtered(mainCollection)" v-if="pagination(index)">
+				<div v-for="(value, field) in item" :class="cellStyleClass(item, field) + ' ' + colWidthClass(field)">
+					<slot :item="item" :name="field">{{value}}</slot>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="float-right">
+	<div :class="previousButtonClass()" @click="previousButtonClick()">Previous</div>
+	<span id="int-table-paging-text">{{pagingText}}</span>
+	<div :class="nextButtonClass()" @click="nextButtonClick()">Next</div>
+</div>
+<div class="int-table-record-count">{{summaryText}}</div>
+</div>
+</script>

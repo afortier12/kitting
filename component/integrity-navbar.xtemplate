@@ -1,0 +1,7 @@
+<script type="text/x-template" id="integrity-navbar">
+<nav id="integrity-main">Integrity<span>OS</span>
+	<span class="float-right welcome-user">
+		<span id="user">{{fullname}}</span> : <span id="role">{{role}}</span>
+	</span>
+</nav>
+</script>

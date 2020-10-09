@@ -1,0 +1,48 @@
+<!doctype html>
+<!-- Note that adding an appcache really speeds things up after the first load
+    You need to amend the appcache file to meet your needs.
+    Don't forget to change the appcache file if you update ANY
+    of the files in it otherwise the old versions will ALWAYS be used.
+<html lang="en" manifest="./uibuilder.appcache">
+-->
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Kitting inventory status</title>
+
+    <!-- APP-LINKS -->
+</head>
+<style>
+/* APP-STYLE */
+html, body, #app {
+	overflow: visible;
+}
+
+#int-table-wrapper {
+	height: 300px;
+}
+
+pre {
+	background-color: #f2f2f2;
+	padding: 20px;
+	margin-bottom: 50px;
+}
+</style>
+<!-- XTEMPLATES -->
+<body>
+    <div class="container" id="app" v-cloak>
+            <!-- APP-TEMPLATE -->
+            <pre v-html="hLastRcvd" class="syntax-highlight"></pre>
+
+            <!-- APP-COMPONENTS -->
+        
+    </div>
+    
+    <!-- NODE-RED SCRIPT-->
+
+</body>
+
+</html>

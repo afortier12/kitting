@@ -1,0 +1,8 @@
+<script type="text/x-template" id="integrity-drawer">
+<div class="int-drawer-background" @click.self="backgroundClicked()" v-if="show">
+	<div class="int-drawer">
+		<div class="btn btn-danger float-right" @click="backgroundClicked()"><i class="fas fa-window-close"></i></div>
+		<slot>Hi</slot>
+	</div>
+</div>
+</script>

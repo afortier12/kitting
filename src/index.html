@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Demo - List</title>
+	
+	<!-- All stylesheets and scripts injected into each page -->
+	<link rel="stylesheet" href="">
+	<link rel="stylesheet" href="./lib/css/bootstrap.min.css">
+	<link rel="stylesheet" href="./lib/css/fontawesome.min.css">
+	<link rel="stylesheet" href="./lib/css/roboto.min.css">
+	<link rel="stylesheet" href="./lib/css/toastr.min.css">
+	<link rel="stylesheet" href="./lib/css/vue-autocomplete.min.css">
+	<link rel="stylesheet" href="./lib/css/vue-multiselect.min.css">
+	<link rel="stylesheet" href="./lib/css/vue-tour.min.css">
+	<link rel="stylesheet" href="./css/integrity-table.css">
+	<link rel="stylesheet" href="./css/integrity-navbar.css">
+	<link rel="stylesheet" href="./css/integrity-drawer.css">
+	<link rel="stylesheet" href="./css/overrides.css">
+	<script src="./lib/js/socket.io.js"></script>
+	<script src="./lib/js/jquery.min.js"></script>
+	<script src="./lib/js/vue.js"></script>
+	<script src="./lib/js/lodash.min.js"></script>
+	<script src="./lib/js/moment.min.js"></script>
+	<script src="./lib/js/toastr.min.js"></script>
+	<script src="./lib/js/chart.min.js"></script>
+	<script src="./lib/js/bootstrap.min.js"></script>
+	<script src="./lib/js/vue-multiselect.min.js"></script>
+	<script src="./lib/js/vue-autocomplete.min.js"></script>
+	<script src="./lib/js/vue-tour.min.js"></script>
+	<script src="./lib/js/uibuilderfe.min.js"></script>
+	<script src="./lib/js/httpVueLoader.js"></script>
+	<script src="./js/integrity.js"></script>
+	<script src="./js/integrity-table.js"></script>
+	<script src="./js/integrity-navbar.js"></script>
+	<script src="./js/integrity-drawer.js"></script>
+
+</head>
+<style>
+
+/* This is the last style tag linked into every page */
+html {
+	padding: 0;
+}
+html, body, #app {
+	height: 100%;
+	overflow: hidden;
+}
+.app-container {
+	height: calc(100% - 40px);
+	padding: 10px;
+}
+
+[v-cloak] {visibility: hidden;}
+
+</style>
+<script type="text/x-template" id="integrity-drawer">
+<div class="int-drawer-background" @click.self="backgroundClicked()" v-if="show">
+	<div class="int-drawer">
+		<div class="btn btn-danger float-right" @click="backgroundClicked()"><i class="fas fa-window-close"></i></div>
+		<slot>Hi</slot>
+	</div>
+</div>
+</script>
+<script type="text/x-template" id="integrity-navbar">
+<nav id="integrity-main">Integrity<span>OS</span>
+	<span class="float-right welcome-user">
+		<span id="user">{{fullname}}</span> : <span id="role">{{role}}</span>
+	</span>
+</nav>
+</script>
+<script type="text/x-template" id="integrity-table">
+<div id="int-table-wrapper">
+<div class="int-table-flex int-table-align">
+	<div class="col-3">
+		<h2>{{name}}</h2>
+	</div>
+	<div class="col-6">
+		<div v-show="filterToggle" class="int-table-flex">
+			<div class="col-5">
+				<select class="form-control" v-model="selectedFilterColumn">
+					<option value='nocolumn'>Select Column...</option>
+					<option v-for='(item, index) in columns' :value="item">{{item}} {{activeFilterCount(item)}}</option>
+				</select>
+			</div>
+			<div class="col-5">
+				<div v-if="selectedFilterColumn != 'nocolumn'" class="int-table-lift">
+					<vue-multiselect :options="filterOptions[selectedFilterColumn]" v-model="filters[selectedFilterColumn]" :multiple="true" :close-on-select="false" :clear-on-select="false" :limit="0" :limit-text="limitText" placeholder="" @close=""></vue-multiselect>
+				</div>
+			</div>
+			<div class="col-1"></div>
+			<div class="col-1 btn btn-warning" @click="resetFilters"><i class="fas fa-recycle"></i></div>
+		</div>
+	</div>
+	<div class="int-table-flex col-3">
+		<div :class="'col-2 btn btn-' + (filterToggle ? 'info' : 'primary')" @click="filterToggle = !filterToggle"><i class="fas fa-filter"></i></div>
+		<div class="col-1"></div>
+		<input type="text" v-model="search" class="form-control col-8" placeholder="search">
+	</div>
+</div>
+<div id="int-table-container">
+	<div class="int-table">
+		<div class="int-table-header">
+			<div class="int-table-row">
+				<div v-for="(column, index) in columns" @click="setOrder(index + 1)" :class="colWidthClass(fields[index])">
+					<span>{{column}} <i :class="sortClass()" v-if="order == index + 1"></i></span>
+				</div>
+			</div>
+		</div>
+		<div class="int-table-body">
+			<div class="int-table-row" v-for="(item, index) in filtered(mainCollection)" v-if="pagination(index)">
+				<div v-for="(value, field) in item" :class="cellStyleClass(item, field) + ' ' + colWidthClass(field)">
+					<slot :item="item" :name="field">{{value}}</slot>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="float-right">
+	<div :class="previousButtonClass()" @click="previousButtonClick()">Previous</div>
+	<span id="int-table-paging-text">{{pagingText}}</span>
+	<div :class="nextButtonClass()" @click="nextButtonClick()">Next</div>
+</div>
+<div class="int-table-record-count">{{summaryText}}</div>
+</div>
+</script>
+
+<body>
+	<div id="app" v-cloak>
+		
+	<!-- This is injected as the first child to #app in each page -->
+	<integrity-navbar></integrity-navbar>
+
+		<div class="app-container">
+			<integrity-table :name="pageName" :collection="mainCollection" :columns="columns">
+				<template v-slot:column6="item">
+					<div class='btn btn-success' @click="successClicked()" v-if="item.item.column2 % 2 == 0"><i class="fas fa-save"></i></div>
+					<div class='btn btn-primary' @click="primaryClicked()" v-else><i class="fas fa-save"></i></div>
+				</template>
+			</integrity-table>
+		</div>
+	</div>
+
+<script>
+	
+	/* This is injected right before every pages view model is initialized */
+	Vue.mixin({
+		// Global mixin standard components
+		components: {
+			"vue-autocomplete": Autocomplete,
+			"vue-multiselect": window.VueMultiselect.default,
+			"vue-tour": window["vue-tour"].default,
+		},
+		// Provide sensible callback defaults in the event they are not defined in the page module
+		methods: {
+			// Default limit text function for multiselect
+			limitText(count){
+				return "(" + count + ") selected"
+			},
+			// Default drawer closer, assumes presence of drawerShow data var
+			closeDrawer(){
+				this.drawerShow = false
+			},
+			// No style class if one not defined
+			cellStyleClass(item, field){
+				return ""
+			},
+			// Standard col width if one not defined
+			colWidthClass(field){
+				return "int-table-width-1"
+			},
+			
+		}
+	})
+	// This simulates a user having securely logged in
+	ilib.setCookie("fullname", "Demo User")
+	ilib.setCookie("role", "Admin")
+
+	let vm = new Vue({
+		el: "#app",
+		props:{
+			'kitting_list': {type: Array, default:()=>[]}
+		},
+		components: {
+        	/* APP-COMPONENTS */
+    	}, // --- End of components --- //
+		data:{
+			startMsg    : 'Vue has started, waiting for messages',
+			feVersion   : '',
+			socketConnectedState : false,
+			serverTimeOffset     : '[unknown]',
+			msgRecvd    : '[Nothing]',
+			pageName: 'Kitting Inventory',
+			mainCollection: [],			  
+			columns: ["Kit", "In-stock", "Required", " Status"],
+		}, // --- End of data --- //
+		computed: { 
+			
+        }, // --- End of computed --- //
+		methods: {
+			cellStyleClass(item, field){
+				if(field == "column2" && item.column2 % 2 == 0){
+					return 'int-table-cell-pink'
+				}
+				return ""
+			},
+			colWidthClass(field){
+
+				if(field == "column1"){
+					return 'int-table-width-2'
+				}
+				return "int-table-width-1"
+			},
+			successClicked(){
+				toastr.success("Success")
+			},
+			primaryClicked(){
+				toastr.info("Primary")
+			},
+		}, // --- End of methods --- //
+		watch: {
+
+		},  // --- End of watch --- //
+		// Available hooks: init,mounted,created,updated,destroyed
+		mounted: function(){
+			//console.debug('[indexjs:Vue.mounted] app mounted - setting up uibuilder watchers')
+
+			/** **REQUIRED** Start uibuilder comms with Node-RED @since v2.0.0-dev3
+			* Pass the namespace and ioPath variables if hosting page is not in the instance root folder
+			* The namespace is the "url" you put in uibuilder's configuration in the Editor.
+			* e.g. If you get continual `uibuilderfe:ioSetup: SOCKET CONNECT ERROR` error messages.
+			* e.g. uibuilder.start('uib', '/nr/uibuilder/vendor/socket.io') // change to use your paths/names
+			*/
+			uibuilder.start()
+
+			var vueApp = this
+
+			// Example of retrieving data from uibuilder
+			vueApp.feVersion = uibuilder.get('version')
+
+			/** You can use the following to help trace how messages flow back and forth.
+			* You can then amend this processing to suite your requirements.
+			*/
+
+			//#region ---- Trace Received Messages ---- //
+			// If msg changes - msg is updated when a standard msg is received from Node-RED over Socket.IO
+			// newVal relates to the attribute being listened to.
+			uibuilder.onChange('msg', function(newVal){
+				//console.info('[indexjs:uibuilder.onChange] msg received from Node-RED server:', newVal)
+				if (msg.hasOwnProperty('kit_summary')){
+					vueApp.mainCollection = msg.kit_summary
+				}
+			})
+			// As we receive new messages, we get an updated count as well
+			uibuilder.onChange('msgsReceived', function(newVal){
+				//console.info('[indexjs:uibuilder.onChange] Updated count of received msgs:', newVal)
+			
+			})
+
+			// If we receive a control message from Node-RED, we can get the new data here - we pass it to a Vue variable
+			uibuilder.onChange('ctrlMsg', function(newVal){
+				//console.info('[indexjs:uibuilder.onChange:ctrlMsg] CONTROL msg received from Node-RED server:', newVal)
+				
+			})
+			// Updated count of control messages received
+			uibuilder.onChange('msgsCtrl', function(newVal){
+				//console.info('[indexjs:uibuilder.onChange:msgsCtrl] Updated count of received CONTROL msgs:', newVal)
+				
+			})
+			//#endregion ---- End of Trace Received Messages ---- //
+
+			//#region ---- Trace Sent Messages ---- //
+			// You probably only need these to help you understand the order of processing //
+			// If a message is sent back to Node-RED, we can grab a copy here if we want to
+			uibuilder.onChange('sentMsg', function(newVal){
+				//console.info('[indexjs:uibuilder.onChange:sentMsg] msg sent to Node-RED server:', newVal)
+				
+			})
+			// Updated count of sent messages
+			uibuilder.onChange('msgsSent', function(newVal){
+				//console.info('[indexjs:uibuilder.onChange:msgsSent] Updated count of msgs sent:', newVal)
+		
+			})
+
+			// If we send a control message to Node-RED, we can get a copy of it here
+			uibuilder.onChange('sentCtrlMsg', function(newVal){
+				//console.info('[indexjs:uibuilder.onChange:sentCtrlMsg] Control message sent to Node-RED server:', newVal)
+		
+			})
+			// And we can get an updated count
+			uibuilder.onChange('msgsSentCtrl', function(newVal){
+				//console.info('[indexjs:uibuilder.onChange:msgsSentCtrl] Updated count of CONTROL msgs sent:', newVal)
+	
+			})
+			//#endregion ---- End of Trace Sent Messages ---- //
+
+			// If Socket.IO connects/disconnects, we get true/false here
+			uibuilder.onChange('ioConnected', function(newVal){
+				//console.info('[indexjs:uibuilder.onChange:ioConnected] Socket.IO Connection Status Changed to:', newVal)
+
+			})
+			// If Server Time Offset changes
+			uibuilder.onChange('serverTimeOffset', function(newVal){
+				//console.info('[indexjs:uibuilder.onChange:serverTimeOffset] Offset of time between the browser and the server has changed to:', newVal)
+
+			})
+
+		} // --- End of mounted hook --- //
+
+	})
+</script>
+
+</body>
+</html>
