@@ -179,6 +179,9 @@ Vue.component('integrity-table', {
 		},
 		resetFilters(){
 			this.filters = {}
+		},
+		select(item){
+			this.$emit('select', item)
 		}
 	},
 	mounted(){

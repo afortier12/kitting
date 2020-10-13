@@ -14,11 +14,8 @@
 	<div id="app" v-cloak>
 		<!-- APP-TEMPLATE -->
 		<div class="app-container">
-			<integrity-table :name="pageName" :collection="mainCollection" :columns="columns">
-				<template v-slot:column6="item">
-					<div class='btn btn-success' @click="successClicked()" v-if="item.item.column2 % 2 == 0"><i class="fas fa-save"></i></div>
-					<div class='btn btn-primary' @click="primaryClicked()" v-else><i class="fas fa-save"></i></div>
-				</template>
+			<integrity-table :name="pageName" :collection="mainCollection" :columns="columns" @select="onSelect">
+				<template v-slot="{ item }"></template>
 			</integrity-table>
 		</div>
 	</div>
@@ -41,7 +38,7 @@
 			msgRecvd    : '[Nothing]',
 			pageName: 'Kitting Inventory',
 			mainCollection: [],			  
-			columns: ["Kit", "In-stock", "Required", " Status"],
+			columns: ["Kit", "In-stock", "Required", " Status", "Select"],
 		}, // --- End of data --- //
 		computed: { 
 			
@@ -66,6 +63,9 @@
 			primaryClicked(){
 				toastr.info("Primary")
 			},
+			onSelect(item){
+				//add call to to redirect to kit page
+			}
 		}, // --- End of methods --- //
 		watch: {
 

@@ -74,7 +74,7 @@ function build() {
 				for(var i in modules){
 					try {
 						var pos = modules[i].lastIndexOf(".")
-						if (pos == 0)
+						if (pos == -1)
 							fs.mkdirSync(path.join(__dirname, OutputDir, modules[i]))
 					} catch (err) {
 						if (err.code === 'EEXIST') {
@@ -82,17 +82,15 @@ function build() {
 							throw err
 						}
 					}
-					if (pos == 0) 
-						fs.readdir(path.join(__dirname, ModuleDir, modules[i]), function(err2, files){
-							if(err !== null){
-								console.log(err)
-							} else {
-								for(var k in files){
-									runBuild(path.join(__dirname, ModuleDir, modules[i], files[k]))
-								}
+					if (pos == -1) 
+						try{
+							files = fs.readdirSync(path.join(__dirname, ModuleDir, modules[i]))
+							for(var k in files){
+								runBuild(path.join(__dirname, ModuleDir, modules[i], files[k]))
 							}
-
-						})
+						} catch (err) {
+							console.log(err)
+						}
 					else
 						//no subdirectory
 						runBuild(path.join(__dirname, ModuleDir, modules[i]))
@@ -159,7 +157,6 @@ var copyDir = function(src, dest) {
 		if(e.code != "EEXIST") {
 			throw e;
 		} else {
-			return;
 		}
 	}
 	var files = fs.readdirSync(src);

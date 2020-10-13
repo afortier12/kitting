@@ -37,8 +37,8 @@
 			</div>
 		</div>
 		<div class="int-table-body">
-			<div class="int-table-row" v-for="(item, index) in filtered(mainCollection)" v-if="pagination(index)">
-				<div v-for="(value, field) in item" :class="cellStyleClass(item, field) + ' ' + colWidthClass(field)">
+			<div class="int-table-row" v-for="(item, index) in filtered(mainCollection)" v-if="pagination(index)" @click="select(item)">
+				<div v-for="(value, field) in item" :class="cellStyleClass(item, field) + ' ' + colWidthClass(field)" >
 					<slot :item="item" :name="field">{{value}}</slot>
 				</div>
 			</div>
