@@ -23,8 +23,10 @@
 	<script src="/lib/js/vue-multiselect.min.js"></script>
 	<script src="/lib/js/vue-autocomplete.min.js"></script>
 	<script src="/lib/js/vue-tour.min.js"></script>
-	<script src="/lib/js/uibuilderfe.min.js"></script>
-	<script src="/lib/js/httpVueLoader.js"></script>
+	<script src="/lib/js/vue-router.min.js"></script>  <!-- added for node-red -->
+	<script src="/lib/js/uibuilderfe.min.js"></script>  <!-- added for node-red -->
+	<script src="/lib/js/httpVueLoader.js"></script>  <!-- added for node-red -->
+	<script src="/js/index.js" type ="module"></script>  <!-- added for node-red -->
 	<script src="/js/integrity.js"></script>
 	<script src="/js/integrity-table.js"></script>
 	<script src="/js/integrity-navbar.js"></script>

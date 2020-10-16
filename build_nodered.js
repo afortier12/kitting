@@ -131,14 +131,8 @@ function runBuild(name) {
 	name = name.replace(ModuleDir, OutputDir)
 	if (state["mode"]== "all"){
 		name = name.replace(".vue", ".html")
-	} else {
-		var pos1 = name.lastIndexOf("\\")
-		if (pos1 > 0)
-			var filename =  name.substring(pos1+1, name.length);
-		name = name.replace(filename,"index.html")
-	}
-
-	if (state["mode"]=="nodered"){
+	} else if (state["mode"]== "nodered" && name.includes("index.vue")) {
+		name = name.replace(".vue", ".html")
 		copyDir(path.join(__dirname, "css"), path.join(__dirname, "src", "css"))
 		copyDir(path.join(__dirname, "js"), path.join(__dirname, "src", "js"))
 		copyDir(path.join(__dirname, "lib"), path.join(__dirname, "src", "lib"))
@@ -146,8 +140,6 @@ function runBuild(name) {
 
 	fs.writeFileSync(name, data)
 }
-
-
 
 
 var copyDir = function(src, dest) {
